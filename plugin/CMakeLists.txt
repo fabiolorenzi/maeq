@@ -13,7 +13,7 @@ juce_add_plugin(${PROJECT_NAME}
     PRODUCT_NAME "Maeq"
 )
 
-juce_generated_juce_header(${PROJECT_NAME})
+juce_generate_juce_header(${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
