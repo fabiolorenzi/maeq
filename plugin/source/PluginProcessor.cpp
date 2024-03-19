@@ -56,7 +56,7 @@ double AudioPluginAudioProcessor::getTailLengthSeconds() const
 
 int AudioPluginAudioProcessor::getNumPrograms()
 {
-    return 1;.
+    return 1;
 }
 
 int AudioPluginAudioProcessor::getCurrentProgram()
