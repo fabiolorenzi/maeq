@@ -77,11 +77,11 @@ enum HighFreq
 
 struct ChainSettings
 {
-    float inputGainInDecibels { 0 }, outputGainInDecibels { 0 };
-    float highPassFreq { ShelvesGain::Gain_0_0 }, lowPassFreq { ShelvesGain::Gain_0_0 };
+    float inputGain { 0 }, outputGain { 0 };
+    float highPassFreq { 0 }, lowPassFreq { 0 };
     LowFreq lowShelfFreq { LowFreq::Freq_32 };
     HighFreq highShelfFreq { HighFreq::Freq_5800 };
-    float lowShelfGainInDecibels { 0 }, highShelfGainInDecibels { 0 };
+    ShelvesGain lowShelfGain { ShelvesGain::Gain_0_0 }, highShelfGain { ShelvesGain::Gain_0_0 };
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -92,7 +92,8 @@ using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, Filter, CutFilter
 using Coefficients = Filter::CoefficientsPtr;
 
 void updateCoefficients(Coefficients& old, const Coefficients& replacements);
-Coefficients makeShelfFilter(const ChainSettings& chainSettings, double sampleRate);
+Coefficients makeLowShelfFilter(const ChainSettings& chainSettings, double sampleRate);
+Coefficients makeHighShelfFilter(const ChainSettings& chainSettings, double sampleRate, bool isLeft);
 
 template<int Index, typename ChainType, typename CoefficientType>
 void update(ChainType& chain, const CoefficientType& coefficients);
@@ -101,7 +102,7 @@ template<typename ChainType, typename CoefficientType>
 void updateCutFilter(ChainType& chain, const CoefficientType& cutCoefficients);
 
 inline auto makeHighPassFilter(const ChainSettings& chainSettings, double sampleRate);
-inline auto makeLowPassfilter(const ChainSettings& chainSettings, double sampleRate);
+inline auto makeLowPassFilter(const ChainSettings& chainSettings, double sampleRate);
 
 //======================================================MAEQ_AUDIO_PROCESSOR======================================================
 

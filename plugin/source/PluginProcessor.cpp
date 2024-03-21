@@ -3,28 +3,55 @@
 
 //======================================================GLOBAL_PROCESSES======================================================
 
-ChainSettings getChainSettings(juce::AudioProcessorValueTreeState &apvts)
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 {
-    return ChainSettings();
+    ChainSettings settings;
+
+    settings.inputGain = apvts.getRawParameterValue("Input Gain")->load();
+    settings.highPassFreq = apvts.getRawParameterValue("HighPass Freq")->load();
+    settings.lowShelfFreq = static_cast<LowFreq>(apvts.getRawParameterValue("LowShelf Freq")->load());
+    settings.lowShelfGain = static_cast<ShelvesGain>(apvts.getRawParameterValue("LowShelf Gain")->load());
+    settings.highShelfGain = static_cast<ShelvesGain>(apvts.getRawParameterValue("HighShelf Gain")->load());
+    settings.highShelfFreq = static_cast<HighFreq>(apvts.getRawParameterValue("HighShelf Freq")->load());
+    settings.lowPassFreq = apvts.getRawParameterValue("LowPass Freq")->load();
+    settings.outputGain = apvts.getRawParameterValue("Output Gain")->load();
+
+    return settings;
 }
 
 void updateCoefficients(Coefficients& old, const Coefficients& replacements)
 {
+    *old = *replacements;
 }
 
-Coefficients makeShelfFilter(const ChainSettings &chainSettings, double sampleRate)
+Coefficients makeLowShelfFilter(const ChainSettings &chainSettings, double sampleRate)
 {
-    return Coefficients();
+    //return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.lowShelfFreq, 0.1, juce::Decibels::decibelsToGain(chainSettings.lowShelfGain));
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.lowShelfFreq, 0.1, juce::Decibels::decibelsToGain(-10.f + (0.5f * chainSettings.lowShelfGain)));
+}
+
+Coefficients makeHighShelfFilter(const ChainSettings &chainSettings, double sampleRate, bool isLeft)
+{
+    /*if (isLeft) {
+        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, (chainSettings.highShelfFreq - (chainSettings.inputGain * 2) - 50), 0.1, juce::Decibels::decibelsToGain(chainSettings.highShelfGain + (chainSettings.inputGain / 36.f) + 0.1));
+    }
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.highShelfFreq, 0.1, juce::Decibels::decibelsToGain(chainSettings.highShelfGain));*/
+    if (isLeft) {
+        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, (chainSettings.highShelfFreq - (chainSettings.inputGain * 2) - 50), 0.1, juce::Decibels::decibelsToGain(-10.f + (0.5 * (chainSettings.highShelfGain + (chainSettings.inputGain / 36.f) + 0.1))));
+    }
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.highShelfFreq, 0.1, juce::Decibels::decibelsToGain(-10.f + (0.5 * chainSettings.highShelfGain)));
 }
 
 template<int Index, typename ChainType, typename CoefficientType>
 inline void update(ChainType &chain, const CoefficientType &coefficients)
 {
+    updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
 }
 
 template<typename ChainType, typename CoefficientType>
 void updateCutFilter(ChainType &chain, const CoefficientType &cutCoefficients)
 {
+    update<0>(chain, cutCoefficients);
 }
 
 inline auto makeHighPassFilter(const ChainSettings &chainSettings, double sampleRate)
@@ -32,7 +59,7 @@ inline auto makeHighPassFilter(const ChainSettings &chainSettings, double sample
     return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.highPassFreq, sampleRate, 12);
 }
 
-inline auto makeLowPassfilter(const ChainSettings &chainSettings, double sampleRate)
+inline auto makeLowPassFilter(const ChainSettings &chainSettings, double sampleRate)
 {
     return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.lowPassFreq, sampleRate, 12);
 }
@@ -120,7 +147,17 @@ void MaeqAudioProcessor::changeProgramName(int index, const juce::String& newNam
 
 void MaeqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    juce::ignoreUnused(sampleRate, samplesPerBlock);
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = 1;
+    spec.sampleRate = sampleRate;
+
+    leftChain.prepare(spec);
+    rightChain.prepare(spec);
+
+    auto chainSettings = getChainSettings(apvts);
+
+    updateFilters();
 }
 
 void MaeqAudioProcessor::releaseResources()
@@ -146,23 +183,30 @@ bool MaeqAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) cons
   #endif
 }
 
-void MaeqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
-                                              juce::MidiBuffer& midiMessages)
+void MaeqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused(midiMessages);
-
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer(channel);
-        juce::ignoreUnused(channelData);
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i) {
+        buffer.clear(i, 0, buffer.getNumSamples());
     }
+
+    auto chainSettings = getChainSettings(apvts);
+
+    updateFilters();
+
+    juce::dsp::AudioBlock<float> block(buffer);
+
+    auto leftBlock = block.getSingleChannelBlock(0);
+    auto rightBlock = block.getSingleChannelBlock(1);
+
+    juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
+
+    leftChain.process(leftContext);
+    rightChain.process(rightContext);
 }
 
 bool MaeqAudioProcessor::hasEditor() const
@@ -178,12 +222,17 @@ juce::AudioProcessorEditor* MaeqAudioProcessor::createEditor()
 
 void MaeqAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
-    juce::ignoreUnused(destData);
+    juce::MemoryOutputStream mos(destData, true);
+    apvts.state.writeToStream(mos);
 }
 
 void MaeqAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
-    juce::ignoreUnused(data, sizeInBytes);
+    auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
+    if (tree.isValid()) {
+        apvts.replaceState(tree);
+        updateFilters();
+    }
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createParameterLayout()
@@ -240,22 +289,49 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
 
 void MaeqAudioProcessor::updateLowShelfFilter(const ChainSettings& chainSettings)
 {
+    auto shelfCoefficients = makeLowShelfFilter(chainSettings, getSampleRate());
+
+    updateCoefficients(leftChain.get<ChainPositions::LowShelf>().coefficients, shelfCoefficients);
+    updateCoefficients(rightChain.get<ChainPositions::LowShelf>().coefficients, shelfCoefficients);
 }
 
 void MaeqAudioProcessor::updateHighShelfFilter(const ChainSettings& chainSettings)
 {
+    auto shelfCoefficientsLeft = makeHighShelfFilter(chainSettings, getSampleRate(), true);
+    auto shelfCoefficientsRight = makeHighShelfFilter(chainSettings, getSampleRate(), false);
+
+    updateCoefficients(leftChain.get<ChainPositions::HighShelf>().coefficients, shelfCoefficientsLeft);
+    updateCoefficients(rightChain.get<ChainPositions::HighShelf>().coefficients, shelfCoefficientsRight);
 }
 
 void MaeqAudioProcessor::updateHighPassFilter(const ChainSettings& chainSettings)
 {
+    auto cutCoefficients = makeHighPassFilter(chainSettings, getSampleRate());
+    auto& leftHighPass = leftChain.get<ChainPositions::HighPass>();
+    auto& rightHighPass = rightChain.get<ChainPositions::HighPass>();
+
+    updateCutFilter(leftHighPass, cutCoefficients);
+    updateCutFilter(rightHighPass, cutCoefficients);
 }
 
 void MaeqAudioProcessor::updateLowPassFilter(const ChainSettings& chainSettings)
 {
+    auto cutCoefficients = makeLowPassFilter(chainSettings, getSampleRate());
+    auto& leftLowPass = leftChain.get<ChainPositions::LowPass>();
+    auto& rightLowPass = rightChain.get<ChainPositions::LowPass>();
+
+    updateCutFilter(leftLowPass, cutCoefficients);
+    updateCutFilter(rightLowPass, cutCoefficients);
 }
 
 void MaeqAudioProcessor::updateFilters()
 {
+    auto chainSettings = getChainSettings(apvts);
+
+    updateHighPassFilter(chainSettings);
+    updateLowShelfFilter(chainSettings);
+    updateHighShelfFilter(chainSettings);
+    updateLowPassFilter(chainSettings);
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
