@@ -26,20 +26,33 @@ void updateCoefficients(Coefficients& old, const Coefficients& replacements)
 
 Coefficients makeLowShelfFilter(const ChainSettings &chainSettings, double sampleRate)
 {
-    //return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.lowShelfFreq, 0.1, juce::Decibels::decibelsToGain(chainSettings.lowShelfGain));
-    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.lowShelfFreq, 0.1, juce::Decibels::decibelsToGain(-10.f + (0.5f * chainSettings.lowShelfGain)));
+    float freq { 32.f };
+    freq *= chainSettings.lowShelfFreq == 0 ? 1 : 2;
+    float gain = -10.f + (0.5f * chainSettings.lowShelfGain);
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, freq, 0.1, juce::Decibels::decibelsToGain(gain));
 }
 
 Coefficients makeHighShelfFilter(const ChainSettings &chainSettings, double sampleRate, bool isLeft)
 {
-    /*if (isLeft) {
-        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, (chainSettings.highShelfFreq - (chainSettings.inputGain * 2) - 50), 0.1, juce::Decibels::decibelsToGain(chainSettings.highShelfGain + (chainSettings.inputGain / 36.f) + 0.1));
+    float freq;
+    float gain = -10.f + (0.5f * chainSettings.highShelfGain);
+
+    if (chainSettings.highShelfFreq == 0) {
+        freq = 5800.f;
+    } else if (chainSettings.highShelfFreq == 1) {
+        freq = 8192.f;
+    } else if (chainSettings.highShelfFreq == 2) {
+        freq = 11600.f;
+    } else if (chainSettings.highShelfFreq == 3) {
+        freq = 16400.f;
+    } else {
+        freq = 22100.f;
     }
-    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.highShelfFreq, 0.1, juce::Decibels::decibelsToGain(chainSettings.highShelfGain));*/
+
     if (isLeft) {
-        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, (chainSettings.highShelfFreq - (chainSettings.inputGain * 2) - 50), 0.1, juce::Decibels::decibelsToGain(-10.f + (0.5 * (chainSettings.highShelfGain + (chainSettings.inputGain / 36.f) + 0.1))));
+        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, (freq - (chainSettings.inputGain * 2) - 50), 0.1, juce::Decibels::decibelsToGain((gain + ((chainSettings.inputGain == 0.f ? 0.1f : chainSettings.inputGain) / 36.f) + 0.1)));
     }
-    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.highShelfFreq, 0.1, juce::Decibels::decibelsToGain(-10.f + (0.5 * chainSettings.highShelfGain)));
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, freq, 0.1, juce::Decibels::decibelsToGain(gain));
 }
 
 template<int Index, typename ChainType, typename CoefficientType>
@@ -328,9 +341,9 @@ void MaeqAudioProcessor::updateFilters()
 {
     auto chainSettings = getChainSettings(apvts);
 
-    updateHighPassFilter(chainSettings);
     updateLowShelfFilter(chainSettings);
     updateHighShelfFilter(chainSettings);
+    updateHighPassFilter(chainSettings);
     updateLowPassFilter(chainSettings);
 }
 
