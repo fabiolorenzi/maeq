@@ -191,36 +191,28 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
     juce::StringArray lowFreqArray;
-    /*for (int i = 0; i < 4; ++i) {
+    int tempFreq { 32 };
+    for (int i = 0; i < 5; ++i) {
         juce::String str;
-        juce::String segment;
-        while(std::getline(LowFreq(i), segment, "_")) {
-            if (segment != "Freq") {
-                str << segment << "Hz";
-            }
-        }
-        lowFreqArray.add(str);
-    }*/
-    for (int i = 0; i < 4; ++i) {
-        juce::String str = std::to_string(LowFreq(i));
-        str << "Hz";
+        tempFreq *= i == 0 ? 1 : 2;
+        str << std::to_string(tempFreq) << "Hz";
         lowFreqArray.add(str);
     }
 
     juce::StringArray highFreqArray;
-    /*for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 5; ++i) {
         juce::String str;
-        juce::String segment;
-        while(std::getline(HighFreq(i), segment, "_")) {
-            if (segment != "Freq") {
-                str << segment << "Hz";
-            }
+        if (i == 0) {
+            str << "5800Hz";
+        } else if (i == 1) {
+            str << "8192Hz";
+        } else if (i == 2) {
+            str << "11600Hz";
+        } else if (i == 3) {
+            str << "16400Hz";
+        } else {
+            str << "22100Hz";
         }
-        highFreqArray.add(str);
-    }*/
-    for (int i = 0; i < 4; ++i) {
-        juce::String str = std::to_string(HighFreq(i));
-        str << "Hz";
         highFreqArray.add(str);
     }
 

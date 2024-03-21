@@ -14,18 +14,20 @@ enum ChainPositions
 
 enum LowFreq
 {
-    Freq_32 = 32,
-    Freq_64 = 64,
-    Freq_128 = 128,
-    Freq_256 = 256
+    Freq_32,
+    Freq_64,
+    Freq_128,
+    Freq_256,
+    Freq_512
 };
 
 enum HighFreq
 {
-    Freq_5800 = 5800,
-    Freq_8192 = 8192,
-    Freq_11600 = 11600,
-    Freq_16400 = 16400
+    Freq_5800,
+    Freq_8192,
+    Freq_11600,
+    Freq_16400,
+    Freq_22100
 };
 
 struct ChainSettings
