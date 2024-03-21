@@ -61,9 +61,7 @@ enum LowFreq
 {
     Freq_32,
     Freq_64,
-    Freq_128,
-    Freq_256,
-    Freq_512
+    Freq_128
 };
 
 enum HighFreq

@@ -29,7 +29,7 @@ Coefficients makeLowShelfFilter(const ChainSettings &chainSettings, double sampl
     float freq { 32.f };
     freq *= chainSettings.lowShelfFreq == 0 ? 1 : 2;
     float gain = -10.f + (0.5f * chainSettings.lowShelfGain);
-    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, freq, 0.1, juce::Decibels::decibelsToGain(gain));
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, freq, 0.15, juce::Decibels::decibelsToGain(gain));
 }
 
 Coefficients makeHighShelfFilter(const ChainSettings &chainSettings, double sampleRate, bool isLeft)
@@ -254,7 +254,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
 
     juce::StringArray lowFreqArray;
     int tempFreq { 32 };
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 3; ++i) {
         juce::String str;
         tempFreq *= i == 0 ? 1 : 2;
         str << std::to_string(tempFreq) << "Hz";
@@ -294,7 +294,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Gain", "LowShelf Gain", lowGainArray, 20));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighShelf Gain", "HighShelf Gain", highGainArray, 20));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighShelf Freq", "HighShelf, Freq", highFreqArray, 0));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("LowPass Freq", "LowPass Freq", juce::NormalisableRange<float>(10000.f, 20000.f, 1.f, 0.5f), 20000.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowPass Freq", "LowPass Freq", juce::NormalisableRange<float>(8000.f, 20000.f, 1.f, 0.5f), 20000.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Output Gain", "Output Gain", juce::NormalisableRange<float>(-18.f, 18.f, 0.1, 1.f), 0.f));
 
     return layout;
