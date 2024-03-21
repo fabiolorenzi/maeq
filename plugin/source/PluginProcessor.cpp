@@ -214,15 +214,23 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
         } else {
             str << "22100Hz";
         }
-        
+
         highFreqArray.add(str);
     }
+
+    juce::StringArray lowGainArray;
+    for (int i = 0; i < 41; ++i) {
+        juce::String str;
+        str << std::to_string(-10.f + (0.5 * i)) << "dB";
+        lowGainArray.add(str);
+    }
+    juce::StringArray highGainArray = lowGainArray;
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("Input Gain", "Input Gain", juce::NormalisableRange<float>(-18.f, 18.f, 0.1, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighPass Freq", "HighPass Freq", juce::NormalisableRange<float>(10.f, 200.f, 1.f, 0.5f), 10.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Freq", "LowShelf Freq", lowFreqArray, 0));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("LowShelf Gain", "LowShelf Gain", juce::NormalisableRange<float>(-10.f, 10.f, 0.5, 1.f), 0.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("HighShelf Gain", "HighShelf Gain", juce::NormalisableRange<float>(-10.f, 10.f, 0.5, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Gain", "LowShelf Gain", lowGainArray, 20));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("HighShelf Gain", "HighShelf Gain", highGainArray, 20));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighShelf Freq", "HighShelf, Freq", highFreqArray, 0));
     layout.add(std::make_unique<juce::AudioParameterFloat>("LowPass Freq", "LowPass Freq", juce::NormalisableRange<float>(10000.f, 20000.f, 1.f, 0.5f), 20000.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Output Gain", "Output Gain", juce::NormalisableRange<float>(-18.f, 18.f, 0.1, 1.f), 0.f));

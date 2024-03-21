@@ -12,6 +12,51 @@ enum ChainPositions
     LowPass
 };
 
+enum ShelvesGain
+{
+    Gain_Neg_10_0,
+    Gain_Neg_9_5,
+    Gain_Neg_9_0,
+    Gain_Neg_8_5,
+    Gain_Neg_8_0,
+    Gain_Neg_7_5,
+    Gain_Neg_7_0,
+    Gain_Neg_6_5,
+    Gain_Neg_6_0,
+    Gain_Neg_5_5,
+    Gain_Neg_5_0,
+    Gain_Neg_4_5,
+    Gain_Neg_4_0,
+    Gain_Neg_3_5,
+    Gain_Neg_3_0,
+    Gain_Neg_2_5,
+    Gain_Neg_2_0,
+    Gain_Neg_1_5,
+    Gain_Neg_1_0,
+    Gain_Neg_0_5,
+    Gain_0_0,
+    Gain_0_5,
+    Gain_1_0,
+    Gain_1_5,
+    Gain_2_0,
+    Gain_2_5,
+    Gain_3_0,
+    Gain_3_5,
+    Gain_4_0,
+    Gain_4_5,
+    Gain_5_0,
+    Gain_5_5,
+    Gain_6_0,
+    Gain_6_5,
+    Gain_7_0,
+    Gain_7_5,
+    Gain_8_0,
+    Gain_8_5,
+    Gain_9_0,
+    Gain_9_5,
+    Gain_10_0
+};
+
 enum LowFreq
 {
     Freq_32,
@@ -33,7 +78,7 @@ enum HighFreq
 struct ChainSettings
 {
     float inputGainInDecibels { 0 }, outputGainInDecibels { 0 };
-    float highPassFreq { 0 }, lowPassFreq { 0 };
+    float highPassFreq { ShelvesGain::Gain_0_0 }, lowPassFreq { ShelvesGain::Gain_0_0 };
     LowFreq lowShelfFreq { LowFreq::Freq_32 };
     HighFreq highShelfFreq { HighFreq::Freq_5800 };
     float lowShelfGainInDecibels { 0 }, highShelfGainInDecibels { 0 };
