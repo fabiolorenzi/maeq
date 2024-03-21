@@ -1,8 +1,46 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-MaeqAudioProcessor::MaeqAudioProcessor()
-     : AudioProcessor(BusesProperties()
+//======================================================GLOBAL_PROCESSES======================================================
+
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState &apvts)
+{
+    return ChainSettings();
+}
+
+void updateCoefficients(Coefficients& old, const Coefficients& replacements)
+{
+}
+
+Coefficients makeShelfFilter(const ChainSettings &chainSettings, double sampleRate)
+{
+    return Coefficients();
+}
+
+template<int Index, typename ChainType, typename CoefficientType>
+inline void update(ChainType &chain, const CoefficientType &coefficients)
+{
+}
+
+template<typename ChainType, typename CoefficientType>
+void updateCutFilter(ChainType &chain, const CoefficientType &cutCoefficients)
+{
+}
+
+inline auto makeHighPassFilter(const ChainSettings &chainSettings, double sampleRate)
+{
+    return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.highPassFreq, sampleRate, 12);
+}
+
+inline auto makeLowPassfilter(const ChainSettings &chainSettings, double sampleRate)
+{
+    return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.lowPassFreq, sampleRate, 12);
+}
+
+//======================================================MAEQ_AUDIO_PROCESSOR======================================================
+
+MaeqAudioProcessor::MaeqAudioProcessor() 
+    : AudioProcessor(BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput("Input",  juce::AudioChannelSet::stereo(), true)
@@ -134,7 +172,8 @@ bool MaeqAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* MaeqAudioProcessor::createEditor()
 {
-    return new MaeqAudioProcessorEditor(*this);
+    // return new MaeqAudioProcessorEditor(*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 void MaeqAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
@@ -145,6 +184,76 @@ void MaeqAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 void MaeqAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     juce::ignoreUnused(data, sizeInBytes);
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    juce::StringArray lowFreqArray;
+    /*for (int i = 0; i < 4; ++i) {
+        juce::String str;
+        juce::String segment;
+        while(std::getline(LowFreq(i), segment, "_")) {
+            if (segment != "Freq") {
+                str << segment << "Hz";
+            }
+        }
+        lowFreqArray.add(str);
+    }*/
+    for (int i = 0; i < 4; ++i) {
+        juce::String str = std::to_string(LowFreq(i));
+        str << "Hz";
+        lowFreqArray.add(str);
+    }
+
+    juce::StringArray highFreqArray;
+    /*for (int i = 0; i < 4; ++i) {
+        juce::String str;
+        juce::String segment;
+        while(std::getline(HighFreq(i), segment, "_")) {
+            if (segment != "Freq") {
+                str << segment << "Hz";
+            }
+        }
+        highFreqArray.add(str);
+    }*/
+    for (int i = 0; i < 4; ++i) {
+        juce::String str = std::to_string(HighFreq(i));
+        str << "Hz";
+        highFreqArray.add(str);
+    }
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Input Gain", "Input Gain", juce::NormalisableRange<float>(-18.f, 18.f, 0.1, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HighPass Freq", "HighPass Freq", juce::NormalisableRange<float>(10.f, 200.f, 1.f, 0.25f), 10.f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Freq", "LowShelf Freq", lowFreqArray, 0));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowShelf Gain", "LowShelf Gain", juce::NormalisableRange<float>(-10.f, 10.f, 0.5, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HighShelf Gain", "HighShelf Gain", juce::NormalisableRange<float>(-10.f, 10.f, 0.5, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("HighShelf Freq", "HighShelf, Freq", highFreqArray, 0));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowPass Freq", "LowPass Freq", juce::NormalisableRange<float>(10000.f, 20000.f, 1.f, 0.25f), 20000.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Output Gain", "Output Gain", juce::NormalisableRange<float>(-18.f, 18.f, 0.1, 1.f), 0.f));
+
+    return layout;
+}
+
+void MaeqAudioProcessor::updateLowShelfFilter(const ChainSettings& chainSettings)
+{
+}
+
+void MaeqAudioProcessor::updateHighShelfFilter(const ChainSettings& chainSettings)
+{
+}
+
+void MaeqAudioProcessor::updateHighPassFilter(const ChainSettings& chainSettings)
+{
+}
+
+void MaeqAudioProcessor::updateLowPassFilter(const ChainSettings& chainSettings)
+{
+}
+
+void MaeqAudioProcessor::updateFilters()
+{
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
