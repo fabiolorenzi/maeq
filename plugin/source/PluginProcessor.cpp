@@ -202,6 +202,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
     juce::StringArray highFreqArray;
     for (int i = 0; i < 5; ++i) {
         juce::String str;
+
         if (i == 0) {
             str << "5800Hz";
         } else if (i == 1) {
@@ -213,6 +214,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
         } else {
             str << "22100Hz";
         }
+        
         highFreqArray.add(str);
     }
 
