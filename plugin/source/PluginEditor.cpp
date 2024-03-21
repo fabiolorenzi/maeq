@@ -1,26 +1,26 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p)
+MaeqAudioProcessorEditor::MaeqAudioProcessorEditor(MaeqAudioProcessor& p)
+    : AudioProcessorEditor(&p), processorRef(p)
 {
-    juce::ignoreUnused (processorRef);
+    juce::ignoreUnused(processorRef);
     setSize (400, 300);
 }
 
-AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
+MaeqAudioProcessorEditor::~MaeqAudioProcessorEditor()
 {
 }
 
-void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
+void MaeqAudioProcessorEditor::paint(juce::Graphics& g)
 {
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    g.setColour(juce::Colours::white);
+    g.setFont(15.0f);
+    g.drawFittedText("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
-void AudioPluginAudioProcessorEditor::resized()
+void MaeqAudioProcessorEditor::resized()
 {
 }

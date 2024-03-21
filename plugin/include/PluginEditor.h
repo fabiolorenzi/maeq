@@ -2,17 +2,17 @@
 
 #include "PluginProcessor.h"
 
-class AudioPluginAudioProcessorEditor final : public juce::AudioProcessorEditor
+class MaeqAudioProcessorEditor final : public juce::AudioProcessorEditor
 {
 public:
-    explicit AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor&);
-    ~AudioPluginAudioProcessorEditor() override;
+    explicit MaeqAudioProcessorEditor(MaeqAudioProcessor&);
+    ~MaeqAudioProcessorEditor() override;
 
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics&) override;
     void resized() override;
 
 private:
-    AudioPluginAudioProcessor& processorRef;
+    MaeqAudioProcessor& processorRef;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MaeqAudioProcessorEditor)
 };
