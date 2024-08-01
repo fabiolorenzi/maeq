@@ -1,24 +1,25 @@
-cmake_minimum_required(VERSION 3.22)
+set(CPM_DOWNLOAD_VERSION 0.38.7)
 
-project(Maeq)
+set(CPM_DOWNLOAD_LOCATION "${LIB_DIR}/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
 
-set(CMAKE_CXX_STANDARD 23)
+get_filename_component(CPM_DOWNLOAD_LOCATION ${CPM_DOWNLOAD_LOCATION} ABSOLUTE)
 
-set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
-include(cmake/cpm.cmake)
+function(download_cpm)
+  message(STATUS "Downloading CPM.cmake to ${CPM_DOWNLOAD_LOCATION}")
+  file(DOWNLOAD
+       https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
+       ${CPM_DOWNLOAD_LOCATION}
+  )
+endfunction()
 
-CPMAddPackage(
-    NAME JUCE
-    GITHUB_REPOSITORY juce-framework/JUCE
-    GIT_TAG 7.0.5
-    VERSION 7.0.5
-    SOURCE_DIR ${LIB_DIR}/juce
-)
-
-if (MSVC)
-    add_compile_options(/Wall)
+if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
+  download_cpm()
 else()
-    add_compile_options(-Wall -Wextra -Wpedantic)
+  file(READ ${CPM_DOWNLOAD_LOCATION} check)
+  if("${check}" STREQUAL "")
+    download_cpm()
+  endif()
+  unset(check)
 endif()
 
-add_subdirectory(plugin)
+include(${CPM_DOWNLOAD_LOCATION})
