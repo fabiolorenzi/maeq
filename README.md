@@ -1,0 +1,1 @@
+Maeq is an EQ developed with the mastering in mind.
