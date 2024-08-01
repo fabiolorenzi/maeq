@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "EQValues.h"
 
 class MaeqAudioProcessor  : public juce::AudioProcessor
 {
