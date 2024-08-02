@@ -49,7 +49,8 @@ Coefficients makeHighShelfFilter(const ChainSettings& chainSettings, double samp
     if (isLeft) {
         return juce::dsp::IIR::Coefficients<float>::makePeakFilter(
             sampleRate,
-            (freq - chainSettings.inputGain * 2) - 87, 0.1,
+            (freq - chainSettings.inputGain * 2) - 87,
+            0.1,
             juce::Decibels::decibelsToGain((gain + ((chainSettings.inputGain == 0.f ? 0.1f : chainSettings.inputGain) / 36.f) + 0.1f))
         );
     }
@@ -302,7 +303,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
     return layout;
 }
 
-void MaeqAudioProcessor::updateLowShelfFilter(const ChainSettings &chainSettings)
+void MaeqAudioProcessor::updateLowShelfFilter(const ChainSettings& chainSettings)
 {
     auto shelfCoefficients = makeLowShelfFilter(chainSettings, getSampleRate());
 
@@ -310,7 +311,7 @@ void MaeqAudioProcessor::updateLowShelfFilter(const ChainSettings &chainSettings
     updateCoefficients(rightChain.get<ChainPositions::LowShelf>().coefficients, shelfCoefficients);
 }
 
-void MaeqAudioProcessor::updateHighShelfFilter(const ChainSettings &chainSettings)
+void MaeqAudioProcessor::updateHighShelfFilter(const ChainSettings& chainSettings)
 {
     auto shelfCoefficientsLeft = makeHighShelfFilter(chainSettings, getSampleRate(), true);
     auto shelfCoefficientsRight = makeHighShelfFilter(chainSettings, getSampleRate(), false);

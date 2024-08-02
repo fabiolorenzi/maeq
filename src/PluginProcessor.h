@@ -47,6 +47,8 @@ inline auto makeLowPassFilter(const ChainSettings& chainSettings, double sampleR
 class MaeqAudioProcessor  : public juce::AudioProcessor
 {
 	public:
+		using AudioProcessor::processBlock;
+		
 		MaeqAudioProcessor();
 		~MaeqAudioProcessor() override;
 
@@ -56,7 +58,6 @@ class MaeqAudioProcessor  : public juce::AudioProcessor
 		bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 
 		void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-		using AudioProcessor::processBlock;															// Check if this line can be moved
 
 		juce::AudioProcessorEditor* createEditor() override;
 		bool hasEditor() const override;

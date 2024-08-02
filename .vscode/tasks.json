@@ -21,13 +21,6 @@
             "command": "cmake --build build --config Release", 
             "group": "build",
             "detail": "CMake compile production"
-        },
-        {
-            "type": "shell",
-            "label": "Run",
-            "command": "D:/setup/external_libraries/JUCE/extras/AudioPluginHost/Builds/VisualStudio2019/x64/Debug/App/AudioPluginHost.exe",
-            "group": "build",
-            "detail": "Run build"
         }
     ]
 }
