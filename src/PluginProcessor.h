@@ -3,20 +3,22 @@
 #include <JuceHeader.h>
 #include "EQValues.h"
 
+#define JucePlugin_Name "Maeq"
+
 //=========================================================GLOBAL_PROCESSES=========================================================
 
 enum ChainPositions
 {
     HighPass,
     LowShelf,
+	GhostPeak,
     HighShelf,
     LowPass
 };
 
 struct ChainSettings
 {
-    float inputGain { 0 }, outputGain { 0 };
-    float highPassFreq { 0 }, lowPassFreq { 0 };
+    float inputGain { 0 }, outputGain { 0 }, highPassFreq { 0 }, lowPassFreq { 0 }, ghostPeakFreq { 0 }, ghostPeakGain { 0 };
     LowFreq lowShelfFreq { LowFreq::Freq_32 };
     HighFreq highShelfFreq { HighFreq::Freq_5800 };
 	ShelvesGain lowShelfGain { ShelvesGain::Gain_0_0 }, highShelfGain { ShelvesGain::Gain_0_0 };
@@ -26,11 +28,12 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
 
 using Filter = juce::dsp::IIR::Filter<float>;
 using CutFilter = juce::dsp::ProcessorChain<Filter>;
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, Filter, CutFilter>;
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, Filter, Filter, CutFilter>;
 using Coefficients = Filter::CoefficientsPtr;
 
 void updateCoefficients(Coefficients& old, const Coefficients& replacements);
 Coefficients makeLowShelfFilter(const ChainSettings& chainSettings, double sampleRate);
+Coefficients makeGhostPeakFilter(const ChainSettings& chainSettings, double sampleRate);
 Coefficients makeHighShelfFilter(const ChainSettings& chainSettings, double sampleRate, bool isLeft);
 
 template<int Index, typename ChainType, typename CoefficientType>
@@ -48,7 +51,7 @@ class MaeqAudioProcessor  : public juce::AudioProcessor
 {
 	public:
 		using AudioProcessor::processBlock;
-		
+
 		MaeqAudioProcessor();
 		~MaeqAudioProcessor() override;
 
@@ -85,6 +88,7 @@ class MaeqAudioProcessor  : public juce::AudioProcessor
 		MonoChain leftChain, rightChain;
 
 		void updateLowShelfFilter(const ChainSettings& chainSettings);
+		void updateGhostPeakFilter(const ChainSettings& chainSettings);
 		void updateHighShelfFilter(const ChainSettings& chainSettings);
 		void updateHighPassFilter(const ChainSettings& chainSettings);
 		void updateLowPassFilter(const ChainSettings& chainSettings);

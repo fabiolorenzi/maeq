@@ -1,6 +1,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+#include <iostream>
+
 //=========================================================GLOBAL_PROCESSES=========================================================
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
@@ -11,6 +13,8 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.highPassFreq = apvts.getRawParameterValue("HighPass Freq")->load();
     settings.lowShelfFreq = static_cast<LowFreq>(apvts.getRawParameterValue("LowShelf Freq")->load());
     settings.lowShelfGain = static_cast<ShelvesGain>(apvts.getRawParameterValue("LowShelf Gain")->load());
+    settings.ghostPeakFreq = apvts.getRawParameterValue("GhostPeak Freq")->load();
+    settings.ghostPeakGain = apvts.getRawParameterValue("GhostPeak Gain")->load();
     settings.highShelfGain = static_cast<ShelvesGain>(apvts.getRawParameterValue("HighShelf Gain")->load());
     settings.highShelfFreq = static_cast<HighFreq>(apvts.getRawParameterValue("HighShelf Freq")->load());
     settings.lowPassFreq = apvts.getRawParameterValue("LowPass Freq")->load();
@@ -31,6 +35,21 @@ Coefficients makeLowShelfFilter(const ChainSettings& chainSettings, double sampl
     freq *= index == 0 ? 1 : index == 1 ? 2 : 4;
     float gain = -10.f + (0.5f * chainSettings.lowShelfGain);
     return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, freq, 0.20, juce::Decibels::decibelsToGain(gain));
+}
+
+Coefficients makeGhostPeakFilter(const ChainSettings& chainSettings, double sampleRate)
+{
+    float freq { 32.f };
+    int index = chainSettings.lowShelfFreq;
+    freq *= index == 0 ? 1 : index == 1 ? 2 : 4;
+    float gain = chainSettings.lowShelfGain > 20 ? -10.f + (0.5f * chainSettings.lowShelfGain) : 0.2;
+    std::cout << chainSettings.lowShelfGain << std::endl;
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(
+        sampleRate,
+        (250.f + freq + gain),
+        1.7,
+        juce::Decibels::decibelsToGain(gain * -0.5)
+    );
 }
 
 Coefficients makeHighShelfFilter(const ChainSettings& chainSettings, double sampleRate, bool isLeft)
@@ -295,6 +314,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighPass Freq", "HighPass Freq", juce::NormalisableRange<float>(5.f, 200.f, 1.f, 0.5f), 5.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Freq", "LowShelf Freq", lowFreqArray, 0));
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Gain", "LowShelf Gain", lowGainArray, 20));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("GhostPeak Freq", "GhostPeak Freq", juce::NormalisableRange<float>(250.f, 500.f, 0.1, 1.f), 250.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("GhostPeak Gain", "GhostPeak Gain", juce::NormalisableRange<float>(-3.5, 0.f, 0.1, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighShelf Gain", "HighShelf Gain", highGainArray, 20));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighShelf Freq", "HighShelf, Freq", highFreqArray, 0));
     layout.add(std::make_unique<juce::AudioParameterFloat>("LowPass Freq", "LowPass Freq", juce::NormalisableRange<float>(8000.f, 22100.f, 1.f, 0.5f), 22100.f));
@@ -309,6 +330,14 @@ void MaeqAudioProcessor::updateLowShelfFilter(const ChainSettings& chainSettings
 
     updateCoefficients(leftChain.get<ChainPositions::LowShelf>().coefficients, shelfCoefficients);
     updateCoefficients(rightChain.get<ChainPositions::LowShelf>().coefficients, shelfCoefficients);
+}
+
+void MaeqAudioProcessor::updateGhostPeakFilter(const ChainSettings& chainSettings)
+{
+    auto peakCoefficients = makeGhostPeakFilter(chainSettings, getSampleRate());
+
+    updateCoefficients(leftChain.get<ChainPositions::GhostPeak>().coefficients, peakCoefficients);
+    updateCoefficients(rightChain.get<ChainPositions::GhostPeak>().coefficients, peakCoefficients);
 }
 
 void MaeqAudioProcessor::updateHighShelfFilter(const ChainSettings& chainSettings)
@@ -345,6 +374,7 @@ void MaeqAudioProcessor::updateFilters()
     auto chainSettings = getChainSettings(apvts);
 
     updateLowShelfFilter(chainSettings);
+    updateGhostPeakFilter(chainSettings);
     updateHighShelfFilter(chainSettings);
     updateHighPassFilter(chainSettings);
     updateLowPassFilter(chainSettings);
