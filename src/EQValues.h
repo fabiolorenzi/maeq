@@ -13,7 +13,7 @@ enum HighFreq
     Freq_8192,
     Freq_11600,
     Freq_16400,
-    Freq_22100
+    Freq_21000
 };
 
 enum ShelvesGain
