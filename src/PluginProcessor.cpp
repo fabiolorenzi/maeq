@@ -231,6 +231,15 @@ void MaeqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mi
         buffer.clear(i, 0, buffer.getNumSamples());
 
     auto chainSettings = getChainSettings(apvts);
+
+    for (int channel = 0; channel < totalNumInputChannels; ++channel) {
+        auto* channelData = buffer.getWritePointer(channel);
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+            channelData[sample] = channelData[sample] * juce::Decibels::decibelsToGain(chainSettings.inputGain);
+            channelData[sample] = channelData[sample] * juce::Decibels::decibelsToGain(chainSettings.outputGain);
+        }
+    }
+
     updateFilters();
 
     juce::dsp::AudioBlock<float> block(buffer);
