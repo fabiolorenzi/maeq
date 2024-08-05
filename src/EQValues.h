@@ -1,5 +1,14 @@
 #pragma once
 
+enum ChainPositions
+{
+    HighPass,
+    LowShelf,
+	GhostPeak,
+    HighShelf,
+    LowPass
+};
+
 enum LowFreq
 {
     Freq_32,

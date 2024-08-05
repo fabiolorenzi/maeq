@@ -8,15 +8,6 @@
 
 //=========================================================GLOBAL_PROCESSES=========================================================
 
-enum ChainPositions
-{
-    HighPass,
-    LowShelf,
-	GhostPeak,
-    HighShelf,
-    LowPass
-};
-
 using Filter = juce::dsp::IIR::Filter<float>;
 using CutFilter = juce::dsp::ProcessorChain<Filter>;
 using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, Filter, Filter, CutFilter>;
