@@ -36,12 +36,14 @@ juce_generate_juce_header(${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
+        src/ChainSettings.cpp
         src/PluginEditor.cpp
         src/PluginProcessor.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
+        src/ChainSettings.h
         src/EQValues.h
         src/PluginEditor.h
         src/PluginProcessor.h

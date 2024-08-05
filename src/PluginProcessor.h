@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "ChainSettings.h"
 #include "EQValues.h"
 
 #define JucePlugin_Name "Maeq"
@@ -15,16 +16,6 @@ enum ChainPositions
     HighShelf,
     LowPass
 };
-
-struct ChainSettings
-{
-    float inputGain { 0 }, outputGain { 0 }, highPassFreq { 0 }, lowPassFreq { 0 }, ghostPeakFreq { 0 }, ghostPeakGain { 0 };
-    LowFreq lowShelfFreq { LowFreq::Freq_32 };
-    HighFreq highShelfFreq { HighFreq::Freq_5800 };
-	ShelvesGain lowShelfGain { ShelvesGain::Gain_0_0 }, highShelfGain { ShelvesGain::Gain_0_0 };
-};
-
-ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
 
 using Filter = juce::dsp::IIR::Filter<float>;
 using CutFilter = juce::dsp::ProcessorChain<Filter>;
@@ -83,6 +74,8 @@ class MaeqAudioProcessor  : public juce::AudioProcessor
 
 		static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 		juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
+
+		ChainSettings chainSettings;
 
 	private:
 		MonoChain leftChain, rightChain;

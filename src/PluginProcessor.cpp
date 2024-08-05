@@ -1,27 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-#include <iostream>
-
 //=========================================================GLOBAL_PROCESSES=========================================================
-
-ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
-{
-    ChainSettings settings;
-
-    settings.inputGain = apvts.getRawParameterValue("Input Gain")->load();
-    settings.highPassFreq = apvts.getRawParameterValue("HighPass Freq")->load();
-    settings.lowShelfFreq = static_cast<LowFreq>(apvts.getRawParameterValue("LowShelf Freq")->load());
-    settings.lowShelfGain = static_cast<ShelvesGain>(apvts.getRawParameterValue("LowShelf Gain")->load());
-    settings.ghostPeakFreq = apvts.getRawParameterValue("GhostPeak Freq")->load();
-    settings.ghostPeakGain = apvts.getRawParameterValue("GhostPeak Gain")->load();
-    settings.highShelfGain = static_cast<ShelvesGain>(apvts.getRawParameterValue("HighShelf Gain")->load());
-    settings.highShelfFreq = static_cast<HighFreq>(apvts.getRawParameterValue("HighShelf Freq")->load());
-    settings.lowPassFreq = apvts.getRawParameterValue("LowPass Freq")->load();
-    settings.outputGain = apvts.getRawParameterValue("Output Gain")->load();
-
-    return settings;
-}
 
 void updateCoefficients(Coefficients& old, const Coefficients& replacements)
 {
@@ -112,6 +92,7 @@ MaeqAudioProcessor::MaeqAudioProcessor()
                        )
 #endif
 {
+    chainSettings = ChainSettings();
 }
 
 MaeqAudioProcessor::~MaeqAudioProcessor()
@@ -191,7 +172,7 @@ void MaeqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     leftChain.prepare(spec);
     rightChain.prepare(spec);
 
-    auto ChainSettings = getChainSettings(apvts);
+    chainSettings.getChainSettings(apvts);
     updateFilters();
 }
 
@@ -230,7 +211,7 @@ void MaeqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mi
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    auto chainSettings = getChainSettings(apvts);
+    chainSettings.getChainSettings(apvts);
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel) {
         auto* channelData = buffer.getWritePointer(channel);
@@ -380,7 +361,7 @@ void MaeqAudioProcessor::updateLowPassFilter(const ChainSettings& chainSettings)
 
 void MaeqAudioProcessor::updateFilters()
 {
-    auto chainSettings = getChainSettings(apvts);
+    chainSettings.getChainSettings(apvts);
 
     updateLowShelfFilter(chainSettings);
     updateGhostPeakFilter(chainSettings);
