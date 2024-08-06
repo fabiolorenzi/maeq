@@ -36,8 +36,9 @@ juce_generate_juce_header(${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-        src/Equalizer.cpp
         src/ChainSettings.cpp
+        src/Equalizer.cpp
+        src/Filter.cpp
         src/PluginEditor.cpp
         src/PluginProcessor.cpp
 )
@@ -47,6 +48,7 @@ target_include_directories(${PROJECT_NAME}
         src/ChainSettings.h
         src/Equalizer.h
         src/EQValues.h
+        src/Filter.h
         src/PluginEditor.h
         src/PluginProcessor.h
 )

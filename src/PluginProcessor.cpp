@@ -15,16 +15,6 @@ void updateCutFilter(ChainType& chain, const CoefficientType& cutCoefficients)
     update<0>(chain, cutCoefficients);
 }
 
-inline auto makeHighPassFilter(const ChainSettings& chainSettings, double sampleRate)
-{
-    return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.highPassFreq, sampleRate, 6);
-}
-
-inline auto makeLowPassFilter(const ChainSettings& chainSettings, double sampleRate)
-{
-    return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.lowPassFreq, sampleRate, 6);
-}
-
 //=======================================================MAEQ_AUDIO_PROCESSOR=======================================================
 
 MaeqAudioProcessor::MaeqAudioProcessor()

@@ -4,8 +4,6 @@
 #include "ChainSettings.h"
 
 using Filter = juce::dsp::IIR::Filter<float>;
-using CutFilter = juce::dsp::ProcessorChain<Filter>;
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, Filter, Filter, CutFilter>;
 using Coefficients = Filter::CoefficientsPtr;
 
 void updateCoefficients(Coefficients& old, const Coefficients& replacements);

@@ -4,6 +4,7 @@
 #include "ChainSettings.h"
 #include "Equalizer.h"
 #include "EQValues.h"
+#include "Filter.h"
 
 #define JucePlugin_Name "Maeq"
 
@@ -19,9 +20,6 @@ void update(ChainType& chain, const CoefficientType& cutCoefficients);
 
 template<typename ChainType, typename CoefficientType>
 void updateCutFilter(ChainType& chain, const CoefficientType& cutCoefficients);
-
-inline auto makeHighPassFilter(const ChainSettings& chainSettings, double sampleRate);
-inline auto makeLowPassFilter(const ChainSettings& chainSettings, double sampleRate);
 
 //=======================================================MAEQ_AUDIO_PROCESSOR=======================================================
 
