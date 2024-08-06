@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Clipper.h"
 #include "ChainSettings.h"
 #include "Equalizer.h"
 #include "EQValues.h"
@@ -14,6 +15,9 @@ using Filter = juce::dsp::IIR::Filter<float>;
 using CutFilter = juce::dsp::ProcessorChain<Filter>;
 using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, Filter, Filter, CutFilter>;
 using Coefficients = Filter::CoefficientsPtr;
+using Context = juce::dsp::ProcessContextReplacing<float>;
+using Oversampler = juce::dsp::Oversampling<float>;
+using AudioBlock = juce::dsp::AudioBlock<float>;
 
 template<int Index, typename ChainType, typename CoefficientType>
 void update(ChainType& chain, const CoefficientType& cutCoefficients);
@@ -59,10 +63,10 @@ class MaeqAudioProcessor  : public juce::AudioProcessor
 
 		static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 		juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
-
-		ChainSettings chainSettings;
 	private:
 		MonoChain leftChain, rightChain;
+		ChainSettings chainSettings;
+		Clipper* clipper;
 
 		void updateLowShelfFilter(const ChainSettings& chainSettings);
 		void updateGhostPeakFilter(const ChainSettings& chainSettings);

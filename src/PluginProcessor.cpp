@@ -30,6 +30,7 @@ MaeqAudioProcessor::MaeqAudioProcessor()
 #endif
 {
     chainSettings = ChainSettings();
+    clipper = new Clipper();
 }
 
 MaeqAudioProcessor::~MaeqAudioProcessor()
@@ -111,6 +112,8 @@ void MaeqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 
     chainSettings.getChainSettings(apvts);
     updateFilters();
+
+    clipper->prepare(sampleRate, samplesPerBlock);
 }
 
 void MaeqAudioProcessor::releaseResources()
@@ -150,6 +153,10 @@ void MaeqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mi
 
     chainSettings.getChainSettings(apvts);
 
+    AudioBlock block(buffer);
+    Context context(block);
+    clipper->process(context);
+
     for (int channel = 0; channel < totalNumInputChannels; ++channel) {
         auto* channelData = buffer.getWritePointer(channel);
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
@@ -159,8 +166,6 @@ void MaeqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mi
     }
 
     updateFilters();
-
-    juce::dsp::AudioBlock<float> block(buffer);
 
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
@@ -238,6 +243,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
     juce::StringArray highGainArray = lowGainArray;
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("Input Gain", "Input Gain", juce::NormalisableRange<float>(-18.f, 18.f, 0.1, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Clipper Thr", "Clipper Thr", juce::NormalisableRange<float>(10.f, 12.f, 0.1, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighPass Freq", "HighPass Freq", juce::NormalisableRange<float>(5.f, 200.f, 1.f, 0.5f), 5.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Freq", "LowShelf Freq", lowFreqArray, 0));
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Gain", "LowShelf Gain", lowGainArray, 20));

@@ -3,6 +3,7 @@
 ChainSettings::ChainSettings()
 {
     inputGain = 0.f;
+    clipperThr = 12.f;
     outputGain = 0.f;
     highPassFreq = 0.f;
     lowPassFreq = 0.f;
@@ -21,6 +22,7 @@ ChainSettings::~ChainSettings()
 ChainSettings ChainSettings::getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 {
     inputGain = apvts.getRawParameterValue("Input Gain")->load();
+    clipperThr = apvts.getRawParameterValue("Clipper Thr")->load();
     highPassFreq = apvts.getRawParameterValue("HighPass Freq")->load();
     lowShelfFreq = static_cast<LowFreq>(apvts.getRawParameterValue("LowShelf Freq")->load());
     lowShelfGain = static_cast<ShelvesGain>(apvts.getRawParameterValue("LowShelf Gain")->load());

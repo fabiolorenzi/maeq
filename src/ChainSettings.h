@@ -10,6 +10,7 @@ class ChainSettings
         ~ChainSettings();
 
         float inputGain;
+        float clipperThr;
         float outputGain;
         float highPassFreq;
         float lowPassFreq;

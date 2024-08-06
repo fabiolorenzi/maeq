@@ -36,6 +36,7 @@ juce_generate_juce_header(${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
+        src/Clipper.cpp
         src/ChainSettings.cpp
         src/Equalizer.cpp
         src/Filter.cpp
@@ -45,6 +46,7 @@ target_sources(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
+        src/Clipper.h
         src/ChainSettings.h
         src/Equalizer.h
         src/EQValues.h
