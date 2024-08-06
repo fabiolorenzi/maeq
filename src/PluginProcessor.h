@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "ChainSettings.h"
+#include "Equalizer.h"
 #include "EQValues.h"
 
 #define JucePlugin_Name "Maeq"
@@ -12,11 +13,6 @@ using Filter = juce::dsp::IIR::Filter<float>;
 using CutFilter = juce::dsp::ProcessorChain<Filter>;
 using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, Filter, Filter, CutFilter>;
 using Coefficients = Filter::CoefficientsPtr;
-
-void updateCoefficients(Coefficients& old, const Coefficients& replacements);
-Coefficients makeLowShelfFilter(const ChainSettings& chainSettings, double sampleRate);
-Coefficients makeGhostPeakFilter(const ChainSettings& chainSettings, double sampleRate);
-Coefficients makeHighShelfFilter(const ChainSettings& chainSettings, double sampleRate, bool isLeft);
 
 template<int Index, typename ChainType, typename CoefficientType>
 void update(ChainType& chain, const CoefficientType& cutCoefficients);
@@ -67,7 +63,6 @@ class MaeqAudioProcessor  : public juce::AudioProcessor
 		juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
 
 		ChainSettings chainSettings;
-
 	private:
 		MonoChain leftChain, rightChain;
 
