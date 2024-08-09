@@ -13,6 +13,7 @@ class Clipper
         ~Clipper();
         void prepare(double inputSampleRate, int maxBlockSize);
         void process(const Context& context);
+        void updateThr(float vol);
     private:
         double sampleRate;
         int bufferSize;
