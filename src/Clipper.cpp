@@ -5,8 +5,8 @@ Clipper::Clipper()
     sampleRate = 0.0;
     bufferSize = 0;
     oversampledBufferSize = 0;
-    threshold = -8.f;
-    ceiling = -8.f;
+    threshold = -4.f;
+    ceiling = -4.f;
     normalGainReduction = {0.f, 0.f};
     oversampledGainReduction = {0.f, 0.f};
 }
@@ -68,6 +68,6 @@ void Clipper::applyGain(AudioBlock& block, int blockSize)
 
 void Clipper::updateThr(float vol)
 {
-    threshold = - vol - 8.f;
-    ceiling = - vol - 8.f;
+    threshold = - vol - 4.f;
+    ceiling = - vol - 4.f;
 }
