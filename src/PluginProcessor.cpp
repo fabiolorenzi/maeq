@@ -156,7 +156,7 @@ void MaeqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mi
     AudioBlock block(buffer);
     Context context(block);
 
-    clipper->updateThr(chainSettings.outputGain);
+    clipper->updateThr(chainSettings.inputGain);
     clipper->process(context);
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel) {

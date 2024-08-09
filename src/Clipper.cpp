@@ -68,6 +68,6 @@ void Clipper::applyGain(AudioBlock& block, int blockSize)
 
 void Clipper::updateThr(float vol)
 {
-    threshold = vol - 8.f;
-    ceiling = vol - 8.f;
+    threshold = - vol - 8.f;
+    ceiling = - vol - 8.f;
 }
