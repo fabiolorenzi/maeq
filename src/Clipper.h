@@ -14,12 +14,15 @@ class Clipper
         void prepare(double inputSampleRate, int maxBlockSize);
         void process(const Context& context);
         void updateThr(float vol);
+        void updateOversample(bool oversampleNewValue, int inputSampleRate, int maxBlockSize);
     private:
         double sampleRate;
         int bufferSize;
         int oversampledBufferSize;
         float threshold;
         float ceiling;
+        bool oversample;
+        int oversampleValue;
         std::array<float, 2> normalGainReduction;
         std::array<float, 2> oversampledGainReduction;
         Oversampler oversampler {2, 2, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false, true};

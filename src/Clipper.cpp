@@ -9,15 +9,17 @@ Clipper::Clipper()
     ceiling = -4.f;
     normalGainReduction = {0.f, 0.f};
     oversampledGainReduction = {0.f, 0.f};
+    oversample = false;
+    oversampleValue = 1;
 }
 
 Clipper::~Clipper() {}
 
 void Clipper::prepare(double inputSampleRate, int maxBlockSize)
 {
-    sampleRate = inputSampleRate * 4;
+    sampleRate = inputSampleRate * oversampleValue;
     bufferSize = maxBlockSize;
-    oversampledBufferSize = bufferSize * 4;
+    oversampledBufferSize = bufferSize * oversampleValue;
     oversampler.reset();
     oversampler.initProcessing(oversampledBufferSize);
 }
@@ -70,4 +72,13 @@ void Clipper::updateThr(float vol)
 {
     threshold = - vol - 4.f;
     ceiling = - vol - 4.f;
+}
+
+void Clipper::updateOversample(bool oversampleNewValue, int inputSampleRate, int maxBlockSize)
+{
+    if (oversampleNewValue != oversample) {
+        oversample = oversampleNewValue;
+        oversampleValue = oversample ? 4 : 1;
+        prepare(inputSampleRate, maxBlockSize);
+    }
 }

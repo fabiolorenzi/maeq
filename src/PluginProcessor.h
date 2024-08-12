@@ -67,6 +67,7 @@ class MaeqAudioProcessor  : public juce::AudioProcessor
 		MonoChain leftChain, rightChain;
 		ChainSettings chainSettings;
 		Clipper* clipper;
+		int samplesPB;
 
 		void updateLowShelfFilter(const ChainSettings& chainSettings);
 		void updateGhostPeakFilter(const ChainSettings& chainSettings);

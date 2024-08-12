@@ -106,6 +106,7 @@ void MaeqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = 1;
     spec.sampleRate = sampleRate;
+    samplesPB = samplesPerBlock;
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
@@ -156,6 +157,7 @@ void MaeqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mi
     AudioBlock block(buffer);
     Context context(block);
 
+    clipper->updateOversample(chainSettings.oversample, getSampleRate(), samplesPB);
     clipper->updateThr(chainSettings.inputGain);
     clipper->process(context);
 
@@ -246,6 +248,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaeqAudioProcessor::createPa
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("Input Gain", "Input Gain", juce::NormalisableRange<float>(-18.f, 18.f, 0.1, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Clipper Thr", "Clipper Thr", juce::NormalisableRange<float>(10.f, 12.f, 0.1, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterBool>("Oversample", "Oversample", false));
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighPass Freq", "HighPass Freq", juce::NormalisableRange<float>(5.f, 200.f, 1.f, 0.5f), 5.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Freq", "LowShelf Freq", lowFreqArray, 0));
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowShelf Gain", "LowShelf Gain", lowGainArray, 20));

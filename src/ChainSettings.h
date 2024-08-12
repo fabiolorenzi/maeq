@@ -11,6 +11,7 @@ class ChainSettings
 
         float inputGain;
         float clipperThr;
+        bool oversample;
         float outputGain;
         float highPassFreq;
         float lowPassFreq;
