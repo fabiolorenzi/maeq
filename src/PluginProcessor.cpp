@@ -188,7 +188,8 @@ bool MaeqAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* MaeqAudioProcessor::createEditor()
 {
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new MaeqAudioProcessorEditor(*this);
+    // return new juce::GenericAudioProcessorEditor(*this);
 }
 
 void MaeqAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
