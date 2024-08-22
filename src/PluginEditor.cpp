@@ -89,7 +89,7 @@ void RotarySliderWithLabels::paint(juce::Graphics& g)
     getLookAndFeel().drawRotarySlider(g, sliderBounds.getX(), sliderBounds.getY(), sliderBounds.getWidth(), sliderBounds.getHeight(), valueToProportionOfLength(getValue()), startAng, endAng, *this);
 
     auto center = sliderBounds.toFloat().getCentre();
-    auto radius = sliderBounds.getWidth() * 0.5f;
+    auto radius = sliderBounds.getWidth() * 1.f;
 
     g.setColour(Colour(255u, 255u, 255u));
     g.setFont(getTextHeight());
@@ -226,6 +226,8 @@ void MaeqAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
     float hRatio = 0.25f;
+
+    bounds.removeFromTop(10);
     
     auto inputGainArea = bounds.removeFromLeft(bounds.getWidth() * 0.125);
     auto highPassFilterArea = bounds.removeFromLeft(bounds.getWidth() * (1.f / 7));
