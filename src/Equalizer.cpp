@@ -20,7 +20,6 @@ Coefficients makeGhostPeakFilter(const ChainSettings& chainSettings, double samp
     int index = chainSettings.lowShelfFreq;
     freq *= index == 0 ? 1 : index == 1 ? 2 : 4;
     float gain = chainSettings.lowShelfGain > 20 ? -10.f + (0.5f * chainSettings.lowShelfGain) : 0.2;
-    std::cout << chainSettings.lowShelfGain << std::endl;
     return juce::dsp::IIR::Coefficients<float>::makePeakFilter(
         sampleRate,
         (250.f + freq + gain),
